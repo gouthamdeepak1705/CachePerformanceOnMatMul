@@ -76,7 +76,7 @@ def main():
         matrixA = flatA.tolist()
         csr_Amatrix = "csrA_"+args.dump
         saveCSRMatrix(matrixA_csr, csr_Amatrix)
-    saveMatrix(matrixA, args.dump)
+    saveMatrix(matrixA, args.dump, "input_matrix.in")
 
 if __name__ == '__main__':
     main()
