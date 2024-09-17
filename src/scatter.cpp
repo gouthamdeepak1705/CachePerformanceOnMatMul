@@ -6,15 +6,15 @@ using namespace std;
 
 void parsec_roi_begin() 
 {
-    
+    // Begin region of interest for performance measurement
 }
 
 void parsec_roi_end() 
 {
-   
+    // End region of interest for performance measurement
 }
 
-
+// Function to generate random indices and data samples for scattering
 void generateRandomIndicesAndData(int max_x, int max_y, vector<pair<int, int>>& indices, vector<int>& data) {
     random_device rd;
     mt19937 gen(rd());
@@ -30,22 +30,12 @@ void generateRandomIndicesAndData(int max_x, int max_y, vector<pair<int, int>>& 
     }
 }
 
-
+// Function to perform scatter operation on a matrix
 void scatter(vector<vector<int>>& matrix, const vector<pair<int, int>>& indices, const vector<int>& data) {
-    for (int i = 0; i < indices.size(); i++) {
+    for (size_t i = 0; i < indices.size(); i++) {  // Changed int to size_t to match indices.size() type
         int x = indices[i].first;
         int y = indices[i].second;
         matrix[x][y] = data[i];
-    }
-}
-
-
-void printMatrix(const vector<vector<int>>& matrix) {
-    for (const auto& row : matrix) {
-        for (const auto& elem : row) {
-            cout << elem << "\t";
-        }
-        cout << endl;
     }
 }
 
@@ -69,13 +59,6 @@ int main() {
     scatter(matrix_128, indices_128, data_128);
     scatter(matrix_150, indices_150, data_150);
     parsec_roi_end();  // End ROI
-
-    // Optional: Print the resulting matrices
-    cout << "Scattered Matrix (128 x 128):" << endl;
-    printMatrix(matrix_128);
-    
-    cout << "\nScattered Matrix (150 x 150):" << endl;
-    printMatrix(matrix_150);
 
     return 0;
 }
