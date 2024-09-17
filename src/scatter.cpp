@@ -10,12 +10,12 @@ using namespace std;
 
 void parsec_roi_begin() 
 {
-
+    // Placeholder for PIN tool region start
 }
 
 void parsec_roi_end() 
 {
-
+    // Placeholder for PIN tool region end
 }
 
 struct Result {
@@ -46,8 +46,22 @@ Result read(string filename) {
     return ab;
 }
 
+void printMatrix(const vector<vector<int>>& matrix) {
+    for (const auto& row : matrix) {
+        for (int val : row) {
+            cout << val << " ";
+        }
+        cout << endl;
+    }
+}
+
 vector< vector<int> > scatter(vector< vector<int> > A) {
     int n = A.size();
+
+    if (n == 0) {  // Check for empty matrix
+        cerr << "Error: Matrix is empty." << endl;
+        return A;
+    }
 
     // Generate 1,000 random indices and 1,000 random values
     for (int i = 0; i < 1000; i++) {
@@ -65,14 +79,19 @@ vector< vector<int> > scatter(vector< vector<int> > A) {
 int main(int argc, char* argv[]) {
     srand(time(0));
     string filename;
-    if (argc < 3) {
+    if (argc < 2) {  // Corrected condition
         filename = "2000.in";
     } else {
-        filename = argv[2];
+        filename = argv[1];  // Use argv[1] for the first argument after the executable name
     }
+
     Result result = read(filename);
     parsec_roi_begin();
     vector< vector<int> > C = scatter(result.A);
     parsec_roi_end();
+
+    // Optional: Print the modified matrix after scatter
+    printMatrix(C);
+
     return 0;
 }
