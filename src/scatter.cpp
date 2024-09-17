@@ -1,22 +1,9 @@
-#include <sstream>
-#include <string>
-#include <fstream>
 #include <iostream>
 #include <vector>
 #include <ctime>
 #include <cstdlib>  // For rand() and srand()
 
 using namespace std;
-
-void parsec_roi_begin() 
-{
-
-}
-
-void parsec_roi_end() 
-{
-
-}
 
 struct Result {
     vector< vector<int> > A;
@@ -47,7 +34,7 @@ Result read(string filename) {
 }
 
 vector< vector<int> > scatter(vector< vector<int> > A) {
-    int n = A.size();
+    int n = A.size();  // Assuming A is a square matrix (n x n)
 
     // Generate 1,000 random indices and 1,000 random values
     for (int i = 0; i < 1000; i++) {
@@ -70,11 +57,18 @@ int main(int argc, char* argv[]) {
     } else {
         filename = argv[2];
     }
-    // Result result = read(filename);
-    int size = 128;
-    vector< vector<int> > A(size, vector<int>(size, 0));
-    parsec_roi_begin();
-    vector< vector<int> > C = scatter(A);
-    parsec_roi_end();
+
+    Result result = read(filename);
+
+    vector< vector<int> > C = scatter(result.A);
+
+    // Display or process matrix C as needed
+    for (const auto& row : C) {
+        for (const auto& val : row) {
+            cout << val << " ";
+        }
+        cout << endl;
+    }
+
     return 0;
 }
