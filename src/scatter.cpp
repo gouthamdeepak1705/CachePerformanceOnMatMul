@@ -1,74 +1,81 @@
 #include <iostream>
 #include <vector>
-#include <ctime>
-#include <cstdlib>  // For rand() and srand()
+#include <random>
 
 using namespace std;
 
-struct Result {
-    vector< vector<int> > A;
-};
-
-Result read(string filename) {
-    vector< vector<int> > A;
-    Result ab;
-    string line;
-    ifstream infile;
-    infile.open(filename.c_str());
-
-    int i = 0;
-    while (getline(infile, line) && !line.empty()) {
-        istringstream iss(line);
-        A.resize(A.size() + 1);
-        int a, j = 0;
-        while (iss >> a) {
-            A[i].push_back(a);
-            j++;
-        }
-        i++;
-    }
-
-    infile.close();
-    ab.A = A;
-    return ab;
+void parsec_roi_begin() 
+{
+    
 }
 
-vector< vector<int> > scatter(vector< vector<int> > A) {
-    int n = A.size();  // Assuming A is a square matrix (n x n)
+void parsec_roi_end() 
+{
+   
+}
 
-    // Generate 1,000 random indices and 1,000 random values
+
+void generateRandomIndicesAndData(int max_x, int max_y, vector<pair<int, int>>& indices, vector<int>& data) {
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<> dis_x(0, max_x - 1);
+    uniform_int_distribution<> dis_y(0, max_y - 1);
+    uniform_int_distribution<> dis_data(1, 100);  // Random data between 1 and 100
+
     for (int i = 0; i < 1000; i++) {
-        int row = rand() % n;   // Random row index
-        int col = rand() % n;   // Random column index
-        int value = rand();     // Random value without bounds
-
-        // Scatter the random value into the matrix
-        A[row][col] = value;
+        int x = dis_x(gen);
+        int y = dis_y(gen);
+        indices.push_back(make_pair(x, y));
+        data.push_back(dis_data(gen));
     }
-
-    return A;
 }
 
-int main(int argc, char* argv[]) {
-    srand(time(0));
-    string filename;
-    if (argc < 3) {
-        filename = "2000.in";
-    } else {
-        filename = argv[2];
+
+void scatter(vector<vector<int>>& matrix, const vector<pair<int, int>>& indices, const vector<int>& data) {
+    for (int i = 0; i < indices.size(); i++) {
+        int x = indices[i].first;
+        int y = indices[i].second;
+        matrix[x][y] = data[i];
     }
+}
 
-    Result result = read(filename);
 
-    vector< vector<int> > C = scatter(result.A);
-
-    // Display or process matrix C as needed
-    for (const auto& row : C) {
-        for (const auto& val : row) {
-            cout << val << " ";
+void printMatrix(const vector<vector<int>>& matrix) {
+    for (const auto& row : matrix) {
+        for (const auto& elem : row) {
+            cout << elem << "\t";
         }
         cout << endl;
     }
+}
+
+int main() {
+    // Step 1: Initialize matrices of size 128x128 and 150x150
+    vector<vector<int>> matrix_128(128, vector<int>(128, 0));
+    vector<vector<int>> matrix_150(150, vector<int>(150, 0));
+
+    // Step 2: Generate random indices and data samples for 128x128 matrix
+    vector<pair<int, int>> indices_128;
+    vector<int> data_128;
+    generateRandomIndicesAndData(128, 128, indices_128, data_128);
+
+    // Step 3: Generate random indices and data samples for 150x150 matrix
+    vector<pair<int, int>> indices_150;
+    vector<int> data_150;
+    generateRandomIndicesAndData(150, 150, indices_150, data_150);
+
+    // Step 4: Perform scatter operation on the matrices
+    parsec_roi_begin();  // Start ROI
+    scatter(matrix_128, indices_128, data_128);
+    scatter(matrix_150, indices_150, data_150);
+    parsec_roi_end();  // End ROI
+
+    // Optional: Print the resulting matrices
+    cout << "Scattered Matrix (128 x 128):" << endl;
+    printMatrix(matrix_128);
+    
+    cout << "\nScattered Matrix (150 x 150):" << endl;
+    printMatrix(matrix_150);
 
     return 0;
 }
