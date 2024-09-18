@@ -64,7 +64,7 @@ vector<vector<int>> padMatrix(const vector<vector<int>>& matrix) {
 }
 
 // Perform convolution using the 7x7 Gaussian kernel
-vector<vector<int>> convolve7x7(const vector<vector<int>>& matrix) {
+vector<vector<int>> convolve(const vector<vector<int>>& matrix) {
     vector<vector<int>> kernel = gaussianKernel7x7();
     vector<vector<int>> padded = padMatrix(matrix);
     int rows = matrix.size();
@@ -93,7 +93,7 @@ int main (int argc, char* argv[]) {
 
     Result result = generateMatrix(rows, cols);  // Generate matrix with the given dimensions
     parsec_roi_begin();
-    vector< vector<int> > C = convolve7x7(result.A);
+    vector< vector<int> > C = convolve(result.A);
     parsec_roi_end();
 
     // Optionally print the result
