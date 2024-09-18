@@ -21,26 +21,19 @@ struct Result {
 	vector< vector<int> > A;
 };
 
-Result read(string filename) {
-	vector< vector<int> > A;
-	Result ab;
-	string line;
-	ifstream infile;
-	infile.open(filename.c_str());
+// Function to generate a matrix with the first dimension as a power of 2 (e.g., 64) 
+// and the second dimension not (e.g., 80)
+Result generateMatrix(int rows, int cols) {
+    Result ab;
+    ab.A.resize(rows, vector<int>(cols, 0));
 
-	int i = 0;
-	while (getline(infile, line)) {
-		istringstream iss(line);
-		A.resize(A.size() + 1);
-		int a;
-		while (iss >> a) {
-			A[i].push_back(a);
-		}
-		i++;
-	}
-	infile.close();
-	ab.A = A;
-	return ab;
+    // Fill the matrix with some random values
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            ab.A[i][j] = rand() % 100;  // Random values between 0 and 99
+        }
+    }
+    return ab;
 }
 
 // Define the 7x7 Gaussian kernel
@@ -94,16 +87,22 @@ vector<vector<int>> convolve7x7(const vector<vector<int>>& matrix) {
 
 int main (int argc, char* argv[]) {
     srand(time(0));
-    string filename;
-    if (argc < 3) {
-        filename = "2000.in";
-    } else {
-        filename = argv[2];
-    }
     
-    Result result = read(filename);
+    int rows = 64;  // Power of 2
+    int cols = 80;  // Not a power of 2
+
+    Result result = generateMatrix(rows, cols);  // Generate matrix with the given dimensions
     parsec_roi_begin();
     vector< vector<int> > C = convolve7x7(result.A);
     parsec_roi_end();
+
+    // Optionally print the result
+    // for (const auto& row : C) {
+    //     for (const auto& elem : row) {
+    //         cout << elem << " ";
+    //     }
+    //     cout << endl;
+    // }
+
     return 0;
 }
