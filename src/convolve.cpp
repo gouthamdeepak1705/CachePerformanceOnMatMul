@@ -26,16 +26,15 @@ Result read(string filename) {
 	Result ab;
 	string line;
 	ifstream infile;
-	infile.open (filename.c_str());
+	infile.open(filename.c_str());
 
 	int i = 0;
-	while (getline(infile, line) && !line.empty()) {
+	while (getline(infile, line)) {
 		istringstream iss(line);
 		A.resize(A.size() + 1);
-		int a, j = 0;
+		int a;
 		while (iss >> a) {
 			A[i].push_back(a);
-			j++;
 		}
 		i++;
 	}
@@ -44,44 +43,50 @@ Result read(string filename) {
 	return ab;
 }
 
-// Define the 3x3 Gaussian kernel with integer values
-vector<vector<int>> gaussianKernel() {
+// Define the 7x7 Gaussian kernel
+vector<vector<int>> gaussianKernel7x7() {
     return {
-        {1, 2, 1},
-        {2, 4, 2},
-        {1, 2, 1}
+        {0, 0, 1, 2, 1, 0, 0},
+        {0, 3, 13, 22, 13, 3, 0},
+        {1, 13, 59, 97, 59, 13, 1},
+        {2, 22, 97, 159, 97, 22, 2},
+        {1, 13, 59, 97, 59, 13, 1},
+        {0, 3, 13, 22, 13, 3, 0},
+        {0, 0, 1, 2, 1, 0, 0}
     };
 }
 
+// Pad the matrix with zeros around the border (for 7x7 kernel)
 vector<vector<int>> padMatrix(const vector<vector<int>>& matrix) {
     int rows = matrix.size();
     int cols = matrix[0].size();
-    vector<vector<int>> padded(rows + 2, vector<int>(cols + 2, 0));
+    vector<vector<int>> padded(rows + 6, vector<int>(cols + 6, 0));
 
     for (int i = 0; i < rows; ++i) {
         for (int j = 0; j < cols; ++j) {
-            padded[i + 1][j + 1] = matrix[i][j];
+            padded[i + 3][j + 3] = matrix[i][j];  // Pad with 3 rows and columns (half of 7-1)
         }
     }
     return padded;
 }
 
-vector<vector<int>> convolve(const vector<vector<int>>& matrix) {
-    vector<vector<int>> kernel = gaussianKernel();
+// Perform convolution using the 7x7 Gaussian kernel
+vector<vector<int>> convolve7x7(const vector<vector<int>>& matrix) {
+    vector<vector<int>> kernel = gaussianKernel7x7();
     vector<vector<int>> padded = padMatrix(matrix);
-    int rows = padded.size();
-    int cols = padded[0].size();
-    vector<vector<int>> result(matrix.size(), vector<int>(matrix[0].size(), 0));
+    int rows = matrix.size();
+    int cols = matrix[0].size();
+    vector<vector<int>> result(rows, vector<int>(cols, 0));
 
-    for (int i = 1; i < rows - 1; ++i) {
-        for (int j = 1; j < cols - 1; ++j) {
+    for (int i = 3; i < rows + 3; ++i) {  // Start at index 3 due to padding
+        for (int j = 3; j < cols + 3; ++j) {
             int sum = 0;
-            for (int ki = -1; ki <= 1; ++ki) {
-                for (int kj = -1; kj <= 1; ++kj) {
-                    sum += padded[i + ki][j + kj] * kernel[ki + 1][kj + 1];
+            for (int ki = -3; ki <= 3; ++ki) {
+                for (int kj = -3; kj <= 3; ++kj) {
+                    sum += padded[i + ki][j + kj] * kernel[ki + 3][kj + 3];  // Shift by 3 for 7x7 kernel
                 }
             }
-            result[i - 1][j - 1] = sum;
+            result[i - 3][j - 3] = sum;
         }
     }
     return result;
@@ -95,9 +100,10 @@ int main (int argc, char* argv[]) {
     } else {
         filename = argv[2];
     }
+    
     Result result = read(filename);
     parsec_roi_begin();
-    vector< vector<int> > C = convolve(result.A);
+    vector< vector<int> > C = convolve7x7(result.A);
     parsec_roi_end();
     return 0;
 }
