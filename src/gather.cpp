@@ -43,14 +43,14 @@ Result read(string filename) {
 }
 
 vector<int> gather(const vector<vector<int>>& A) {
-    int n = A.size();  // Number of rows in the matrix
+    size_t n = A.size();  // Number of rows in the matrix (size_t for consistency)
     int number_of_indices = 1000;  // Number of random elements to gather
     vector<int> indices(number_of_indices);  // Vector to store random indices
     vector<int> gathered_data(number_of_indices);  // Vector to store gathered elements
     
     // Generate 1,000 random indices and gather elements
     for (int i = 0; i < number_of_indices; i++) {
-        int row, col;
+        size_t row, col;  // Changed to size_t to match the type of vector size
         do {
             int random_index = rand() % (n * n);  // Random index within the flattened matrix
             row = random_index / n;  // Compute row index
