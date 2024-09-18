@@ -1,84 +1,98 @@
+#include <sstream>
+#include <string>
+#include <fstream>
 #include <iostream>
 #include <vector>
-#include <random>
-#include <fstream>
-#include <sstream>
 
 using namespace std;
 
 void parsec_roi_begin() 
 {
-    // Placeholder for beginning of region of interest for performance measurement
+
 }
 
 void parsec_roi_end() 
 {
-    // Placeholder for end of region of interest for performance measurement
+
 }
 
-// Function to read a matrix from a file
-vector<vector<int>> readMatrixFromFile(const string& filename) {
-    ifstream infile(filename);
-    vector<vector<int>> matrix;
-    string line;
 
-    while (getline(infile, line)) {
-        istringstream iss(line);
-        vector<int> row;
-        int value;
-        while (iss >> value) {
-            row.push_back(value);
-        }
-        matrix.push_back(row);
-    }
+struct Result {
+	vector< vector<int> > A;
+	
+};
 
-    infile.close();
-    return matrix;
+Result read(string filename) {
+	vector< vector<int> > A;
+	Result ab;
+	string line;
+	ifstream infile;
+	infile.open (filename.c_str());
+
+	int i = 0;
+	while (getline(infile, line) && !line.empty()) {
+		istringstream iss(line);
+		A.resize(A.size() + 1);
+		int a, j = 0;
+		while (iss >> a) {
+			A[i].push_back(a);
+			j++;
+		}
+		i++;
+	}
+
+	
+
+	infile.close();
+	ab.A = A;
+	return ab;
 }
 
-// Function to generate random indices and data samples for scattering
-void generateRandomIndicesAndData(int max_x, int max_y, vector<pair<int, int>>& indices, vector<int>& data) {
-    random_device rd;
-    mt19937 gen(rd());
-    uniform_int_distribution<> dis_x(0, max_x - 1);
-    uniform_int_distribution<> dis_y(0, max_y - 1);
-    uniform_int_distribution<> dis_data(1, 100);  // Random data between 1 and 100
+vector<vector<int>> scatter(vector<vector<int>>& A) {
+    int rows = A.size();
+    if (rows == 0) return A;  // Return if matrix is empty
 
+    int cols = A[0].size();
+
+    // Seed the random number generator
+    srand(static_cast<unsigned>(time(0)));
+
+    // Scatter: Assign random values to 100 random indices
     for (int i = 0; i < 1000; i++) {
-        int x = dis_x(gen);
-        int y = dis_y(gen);
-        indices.push_back(make_pair(x, y));
-        data.push_back(dis_data(gen));
+        int x = rand() % rows;  // Random row index
+        int y = rand() % cols;  // Random column index
+        int new_value = (rand() % 1000) + 1;  // Random value between 1 and 100
+        A[x][y] = new_value;  // Assign the random value to the random index
     }
+
+    return A;
 }
 
-// Function to perform scatter operation on a matrix
-void scatter(vector<vector<int>>& matrix, const vector<pair<int, int>>& indices, const vector<int>& data) {
-    for (size_t i = 0; i < indices.size(); i++) {
-        int x = indices[i].first;
-        int y = indices[i].second;
-        matrix[x][y] = data[i];
-    }
+void printMatrix(vector< vector<int> > matrix) {
+	vector< vector<int> >::iterator it;
+	vector<int>::iterator inner;
+	for (it=matrix.begin(); it != matrix.end(); it++) {
+		for (inner = it->begin(); inner != it->end(); inner++) {
+			cout << *inner;
+			if(inner+1 != it->end()) {
+				cout << "\t";
+			}
+		}
+		cout << endl;
+	}
 }
 
-int main(int argc, char* argv[]) {
-    if (argc < 2) {
-        cerr << "Usage: " << argv[0] << " input_file" << endl;
-        return 1;
-    }
-
-    // Read the generated matrix from the file
-    vector<vector<int>> matrix = readMatrixFromFile(argv[1]);
-
-    // Generate random indices and data samples for the scatter operation
-    vector<pair<int, int>> indices;
-    vector<int> data;
-    generateRandomIndicesAndData(matrix.size(), matrix[0].size(), indices, data);
-
-    // Perform scatter operation on the matrix
+int main (int argc, char* argv[]) {
+	string filename;
+	if (argc < 3) {
+		filename = "2000.in";
+	} else {
+		filename = argv[2];
+	}
+	Result result = read (filename);
     parsec_roi_begin();
-    scatter(matrix, indices, data);
+	vector< vector<int> > C = scatter(result.A);
     parsec_roi_end();
-
-    return 0;
+	//printMatrix(C);
+	return 0;
 }
