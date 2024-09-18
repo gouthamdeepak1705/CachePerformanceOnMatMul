@@ -9,60 +9,59 @@ using namespace std;
 
 void parsec_roi_begin() 
 {
+    // Mark the beginning of the region of interest
 }
 
 void parsec_roi_end() 
 {
+    // Mark the end of the region of interest
 }
 
 struct Result {
-    vector< vector<int> > A;
+    vector<vector<int>> A;  // Corrected to store a 2D vector
 };
 
+// Function to read the matrix from a file
 Result read(string filename) {
-    vector< vector<int> > A;
+    vector<vector<int>> A;
     Result ab;
     string line;
-    ifstream infile;
-    infile.open (filename.c_str());
+    ifstream infile(filename.c_str());
 
-    int i = 0;
+    if (!infile.is_open()) {
+        cerr << "Error opening file: " << filename << endl;
+        return ab;  // Return an empty Result
+    }
+
     while (getline(infile, line) && !line.empty()) {
         istringstream iss(line);
         A.resize(A.size() + 1);
-        int a, j = 0;
+        int a;
         while (iss >> a) {
-            A[i].push_back(a);
-            j++;
+            A.back().push_back(a);  // Push back into the last row
         }
-        i++;
     }
+
     infile.close();
     ab.A = A;
     return ab;
 }
 
+// Gather function that returns a 1D vector of gathered data
 vector<int> gather(const vector<vector<int>>& A) {
     int n = A.size();
-    int number_of_indices = 1000;
-    vector<int> indices(number_of_indices), gathered_data(number_of_indices);
-    
-    // Generate 1,000 random indices
-    for(int i = 0; i < number_of_indices; i++) {
-        indices[i] = rand() % (n * n);  // Random index within the flattened matrix
+    vector<int> B(1000);
+
+    // Generate 1,000 random indices and gather values
+    for (int i = 0; i < 1000; i++) {
+        int row = rand() % n;   // Random row index
+        int col = rand() % n;   // Random column index
+        B[i] = A[row][col];     // Gather the value from the matrix
     }
-    
-    // Gather elements at the random indices
-    for(int i = 0; i < number_of_indices; i++) {
-        int row = indices[i] / n;  // Compute row
-        int col = indices[i] % n;  // Compute column
-        gathered_data[i] = A[row][col];  // Gather the element
-    }
-    
-    return gathered_data;  // Return the gathered data
+    return B;
 }
 
-// Updated to print a 1D vector
+// Function to print a 1D vector
 void printVector(const vector<int>& vec) {
     for (size_t i = 0; i < vec.size(); i++) {
         cout << vec[i];
@@ -73,21 +72,28 @@ void printVector(const vector<int>& vec) {
     cout << endl;
 }
 
-int main (int argc, char* argv[]) {
-    srand(time(0));
+int main(int argc, char* argv[]) {
+    srand(time(0));  // Seed the random number generator
+
     string filename;
     if (argc < 3) {
-        filename = "2000.in";
+        filename = "2000.in";  // Default filename
     } else {
         filename = argv[2];
     }
-    Result result = read (filename);
+
+    Result result = read(filename);
+    if (result.A.empty()) {  // Check if matrix read is successful
+        cerr << "Error: Matrix read unsuccessful or empty!" << endl;
+        return 1;
+    }
+
     parsec_roi_begin();
-    vector<int> C = gather(result.A);  // Corrected to vector<int>
+    vector<int> C = gather(result.A);  // Gather values from the matrix
     parsec_roi_end();
-    
+
     // Optionally print the gathered data as a 1D vector
     //printVector(C);
-    
+
     return 0;
 }
