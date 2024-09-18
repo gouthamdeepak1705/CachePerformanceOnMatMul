@@ -1,3 +1,5 @@
+// Updated code with additional checks
+
 #include <sstream>
 #include <string>
 #include <fstream>
@@ -7,13 +9,9 @@
 
 using namespace std;
 
-void parsec_roi_begin() 
-{
-}
+void parsec_roi_begin() {}
 
-void parsec_roi_end() 
-{
-}
+void parsec_roi_end() {}
 
 struct Result {
     vector< vector<int> > A;
@@ -24,7 +22,12 @@ Result read(string filename) {
     Result ab;
     string line;
     ifstream infile;
-    infile.open (filename.c_str());
+    infile.open(filename.c_str());
+
+    if (!infile.is_open()) { // Check if file opened successfully
+        cerr << "Error opening file: " << filename << endl;
+        return ab; // Return empty Result
+    }
 
     int i = 0;
     while (getline(infile, line) && !line.empty()) {
@@ -44,6 +47,11 @@ Result read(string filename) {
 
 vector<int> gather(const vector<vector<int>>& A) {
     int n = A.size();
+    if (n == 0) {
+        cerr << "Error: Matrix is empty!" << endl;
+        return {};
+    }
+    
     int number_of_indices = 1000;
     vector<int> indices(number_of_indices), gathered_data(number_of_indices);
     
@@ -56,21 +64,16 @@ vector<int> gather(const vector<vector<int>>& A) {
     for(int i = 0; i < number_of_indices; i++) {
         int row = indices[i] / n;  // Compute row
         int col = indices[i] % n;  // Compute column
+        
+        if (row < 0 || row >= n || col < 0 || col >= A[row].size()) { // Check bounds
+            cerr << "Error: Index out of bounds at " << row << ", " << col << endl;
+            continue;
+        }
+        
         gathered_data[i] = A[row][col];  // Gather the element
     }
     
     return gathered_data;  // Return the gathered data
-}
-
-// Updated to print a 1D vector
-void printVector(const vector<int>& vec) {
-    for (size_t i = 0; i < vec.size(); i++) {
-        cout << vec[i];
-        if (i + 1 != vec.size()) {
-            cout << "\t";
-        }
-    }
-    cout << endl;
 }
 
 int main (int argc, char* argv[]) {
@@ -82,6 +85,11 @@ int main (int argc, char* argv[]) {
         filename = argv[2];
     }
     Result result = read (filename);
+    if (result.A.empty()) { // Check if matrix read is successful
+        cerr << "Error: Matrix read unsuccessful or empty!" << endl;
+        return 1;
+    }
+
     parsec_roi_begin();
     vector<int> C = gather(result.A);  // Corrected to vector<int>
     parsec_roi_end();
