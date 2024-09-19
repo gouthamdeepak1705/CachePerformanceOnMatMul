@@ -21,18 +21,29 @@ struct Result {
 	vector< vector<int> > A;
 };
 
-// Function to generate a matrix with the first dimension as a power of 2 (e.g., 64) 
-// and the second dimension not (e.g., 80)
-Result generateMatrix(int rows, int cols) {
+// Function to read the matrix from a file (as specified in the bash script)
+Result readMatrixFromFile(string filename) {
+    vector< vector<int> > A;
     Result ab;
-    ab.A.resize(rows, vector<int>(cols, 0));
+    string line;
+    ifstream infile(filename);
 
-    // Fill the matrix with some random values
-    for (int i = 0; i < rows; ++i) {
-        for (int j = 0; j < cols; ++j) {
-            ab.A[i][j] = rand() % 100;  // Random values between 0 and 99
-        }
+    if (!infile.is_open()) {
+        cerr << "Error opening file: " << filename << endl;
+        exit(1);
     }
+
+    while (getline(infile, line)) {
+        istringstream iss(line);
+        vector<int> row;
+        int value;
+        while (iss >> value) {
+            row.push_back(value);
+        }
+        A.push_back(row);
+    }
+    infile.close();
+    ab.A = A;
     return ab;
 }
 
@@ -88,10 +99,13 @@ vector<vector<int>> convolve(const vector<vector<int>>& matrix) {
 int main (int argc, char* argv[]) {
     srand(time(0));
     
-    int rows = 64;  // Power of 2
-    int cols = 80;  // Not a power of 2
+    if (argc < 2) {
+        cerr << "Usage: " << argv[0] << " input_file" << endl;
+        return 1;
+    }
 
-    Result result = generateMatrix(rows, cols);  // Generate matrix with the given dimensions
+    string input_filename = argv[1];  // Use the input file specified in the command line
+    Result result = readMatrixFromFile(input_filename);  // Read the matrix from the file
     parsec_roi_begin();
     vector< vector<int> > C = convolve(result.A);
     parsec_roi_end();
