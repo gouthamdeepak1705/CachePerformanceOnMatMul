@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <ctime>
+#include <unordered_set>
 
 using namespace std;
 
@@ -44,25 +45,30 @@ Result read(string filename) {
 
 vector<int> gather(const vector<vector<int>>& A) {
     int n = A.size();
-    int number_of_indices = 1000;
-    vector<int> indices(number_of_indices), gathered_data(number_of_indices);
+    int elements = 1000;
+    vector<int> indices(elements), result(elements);
+    unordered_set<int> unique_indices;
     
-    // Generate 1,000 random indices
-    for(int i = 0; i < number_of_indices; i++) {
-        indices[i] = rand() % (n * n);  // Random index within the flattened matrix
+    for(int i = 0; i < elements; ++i) {
+        int random_index;
+        do {
+            random_index = rand() % (n * n);
+        } while(unique_indices.find(random_index) != unique_indices.end());
+        
+        indices[i] = random_index;
+        unique_indices.insert(random_index);
+    }
+
+    int offset = 5;
+    for(int idx = 0; idx < elements; ++idx) {
+        int rowIndex = indices[idx] / n;
+        int columnIndex = indices[idx] % n;
+        result[idx] = A[rowIndex][columnIndex] + offset;
     }
     
-    // Gather elements at the random indices
-    for(int i = 0; i < number_of_indices; i++) {
-        int row = indices[i] / n;  // Compute row
-        int col = indices[i] % n;  // Compute column
-        gathered_data[i] = A[row][col];  // Gather the element
-    }
-    
-    return gathered_data;  // Return the gathered data
+    return result;
 }
 
-// Updated to print a 1D vector
 void printVector(const vector<int>& vec) {
     for (size_t i = 0; i < vec.size(); i++) {
         cout << vec[i];
@@ -83,11 +89,7 @@ int main (int argc, char* argv[]) {
     }
     Result result = read (filename);
     parsec_roi_begin();
-    vector<int> C = gather(result.A);  // Corrected to vector<int>
+    vector<int> C = gather(result.A);
     parsec_roi_end();
-    
-    // Optionally print the gathered data as a 1D vector
-    //printVector(C);
-    
     return 0;
 }
